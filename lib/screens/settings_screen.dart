@@ -114,7 +114,8 @@ class SettingsScreen extends StatelessWidget {
                                   content: Text(
                                     provider.isConnected 
                                         ? '✅ ${provider.isRemoteMode ? "Remote" : "Local"} bağlantı başarılı' 
-                                        : '❌ Bağlantı kurulamadı',
+                                        : '❌ Bağlantı kurulamadı: ${provider.error ?? "Timeout"}',
+                                  duration: const Duration(seconds: 5),
                                   ),
                                 ),
                               );

@@ -61,26 +61,38 @@ class AppProvider extends ChangeNotifier {
     refreshSensorData(); // Yeni sunucuyla test et
   }
   
-  // Otomatik sunucu seç (local önce, yoksa remote)
+  // Otomatik sunucu seç (remote önce - dışarıdan erişim için)
   Future<void> autoSelectServer() async {
-    // Önce local dene
-    ApiService.setRemoteMode(false);
-    try {
-      await _api.getMetrics().timeout(const Duration(seconds: 3));
-      _isConnected = true;
-      notifyListeners();
-      return;
-    } catch (_) {}
+    _error = null;
     
-    // Local başarısız, remote dene
+    // Önce REMOTE dene (dışarıdan erişim öncelikli)
     ApiService.setRemoteMode(true);
     try {
-      await _api.getMetrics().timeout(const Duration(seconds: 5));
+      debugPrint('Testing remote: ${ApiService.baseUrl}');
+      await _api.getMetrics().timeout(const Duration(seconds: 15));
       _isConnected = true;
+      _error = null;
+      debugPrint('Remote connection successful');
       notifyListeners();
       return;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Remote failed: $e');
+    }
+    
+    // Remote başarısız, local dene
+    ApiService.setRemoteMode(false);
+    try {
+      debugPrint('Testing local: ${ApiService.baseUrl}');
+      await _api.getMetrics().timeout(const Duration(seconds: 5));
+      _isConnected = true;
+      _error = null;
+      debugPrint('Local connection successful');
+      notifyListeners();
+      return;
+    } catch (e) {
+      debugPrint('Local failed: $e');
       _isConnected = false;
+      _error = e.toString();
       notifyListeners();
     }
   }
