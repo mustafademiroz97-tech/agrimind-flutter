@@ -8,28 +8,19 @@ import '../models/report.dart';
 class ApiService {
   // Varsayılan URL'ler
   static const String localUrl = 'http://192.168.0.3:5000';
-  static const String _remoteUrl = 'https://api.neuraponic.com';
+  static const String remoteUrl = 'https://api.neuraponic.com';
   
   // Aktif URL - başlangıçta REMOTE (dışarıdan erişim için)
-  static String _baseUrl = _remoteUrl;
+  static String _baseUrl = remoteUrl;
   static bool _isRemote = true;
   
   static String get baseUrl => _baseUrl;
   static bool get isRemote => _isRemote;
-  static String get remoteUrl => _remoteUrl;
   
   // URL'i manuel değiştir
   static void setRemoteMode(bool remote) {
     _isRemote = remote;
-    _baseUrl = remote ? _remoteUrl : localUrl;
-  }
-  
-  // Özel URL ayarla
-  static void setCustomUrl(String url) {
-    _remoteUrl = url;
-    if (_isRemote) {
-      _baseUrl = url;
-    }
+    _baseUrl = remote ? remoteUrl : localUrl;
   }
   
   // Direkt URL ayarla
