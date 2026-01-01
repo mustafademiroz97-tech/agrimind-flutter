@@ -27,7 +27,11 @@ jobs:
           cache: true
       
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          flutter --version
+          dart --version
+          flutter pub get --verbose 2>&1 || true
+          flutter pub get
       
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
