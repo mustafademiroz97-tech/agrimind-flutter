@@ -30,12 +30,6 @@ class AgriMindApp extends StatelessWidget {
             brightness: Brightness.dark,
           ),
           useMaterial3: true,
-          cardTheme: CardTheme(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
         ),
         home: const HomeScreen(),
       ),

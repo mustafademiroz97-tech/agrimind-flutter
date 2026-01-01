@@ -8,25 +8,33 @@ import '../models/report.dart';
 class ApiService {
   // Varsayılan URL'ler
   static const String localUrl = 'http://192.168.0.3:5000';
-  static const String remoteUrl = 'https://implementation-performed-pull-winston.trycloudflare.com';
+  static String _remoteUrl = 'https://senators-john-herb-accomplished.trycloudflare.com';
   
-  // Aktif URL - başlangıçta remote (mobil için)
-  static String _baseUrl = remoteUrl;
+  // Aktif URL - başlangıçta REMOTE (dışarıdan erişim için)
+  static String _baseUrl = _remoteUrl;
   static bool _isRemote = true;
   
   static String get baseUrl => _baseUrl;
   static bool get isRemote => _isRemote;
+  static String get remoteUrl => _remoteUrl;
   
   // URL'i manuel değiştir
   static void setRemoteMode(bool remote) {
     _isRemote = remote;
-    _baseUrl = remote ? remoteUrl : localUrl;
+    _baseUrl = remote ? _remoteUrl : localUrl;
   }
   
-  // URL'i güncelle (Cloudflare tunnel değişirse)
-  static void setRemoteUrl(String url) {
-    // remoteUrl'i runtime'da güncelle - not possible with const
-    // Bu durumda SharedPreferences kullanılabilir
+  // Özel URL ayarla
+  static void setCustomUrl(String url) {
+    _remoteUrl = url;
+    if (_isRemote) {
+      _baseUrl = url;
+    }
+  }
+  
+  // Direkt URL ayarla
+  static void setBaseUrl(String url) {
+    _baseUrl = url;
   }
   
   // Timeout süresi
