@@ -8,7 +8,7 @@ import '../models/report.dart';
 class ApiService {
   // Varsayılan URL'ler
   static const String localUrl = 'http://192.168.0.3:5000';
-  static const String remoteUrl = 'https://barry-national-give-observation.trycloudflare.com';
+  static const String remoteUrl = 'https://implementation-performed-pull-winston.trycloudflare.com';
   
   // Aktif URL - başlangıçta remote (mobil için)
   static String _baseUrl = remoteUrl;
