@@ -28,9 +28,11 @@ jobs:
       
       - name: Get dependencies
         run: |
+          echo "=== Flutter Version ==="
           flutter --version
+          echo "=== Dart Version ==="
           dart --version
-          flutter pub get --verbose 2>&1 || true
+          echo "=== Pub Get ==="
           flutter pub get
       
       - name: Build APK
