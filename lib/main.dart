@@ -30,10 +30,10 @@ class AgriMindApp extends StatelessWidget {
             brightness: Brightness.dark,
           ),
           useMaterial3: true,
-          cardTheme: const CardThemeData(
+          cardTheme: CardTheme(
             elevation: 4,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
         ),
