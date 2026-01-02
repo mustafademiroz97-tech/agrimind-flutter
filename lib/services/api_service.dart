@@ -7,6 +7,7 @@ import '../models/report.dart';
 
 class ApiService {
   // URL'ler artık sadece remote olacak şekilde sabitlendi.
+  // Production URL
   static const String _baseUrl = 'https://api.neuraponic.com';
 
   static String get baseUrl => _baseUrl;
@@ -22,15 +23,15 @@ class ApiService {
   }
 
   // Timeout süresi
-  static const Duration timeout = Duration(seconds: 15); // Timeout biraz artırıldı.
+  static const Duration timeout =
+      Duration(seconds: 15); // Timeout biraz artırıldı.
 
   // ============ SENSORS ============
   Future<SensorData> getMetrics() async {
     try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/api/metrics'))
-          .timeout(timeout);
-      
+      final response =
+          await http.get(Uri.parse('$baseUrl/api/metrics')).timeout(timeout);
+
       if (response.statusCode == 200) {
         return SensorData.fromJson(jsonDecode(response.body));
       }
@@ -51,7 +52,7 @@ class ApiService {
             body: jsonEncode({'message': message}),
           )
           .timeout(const Duration(seconds: 30)); // Brain için daha uzun timeout
-      
+
       return BrainResponse.fromJson(jsonDecode(response.body));
     } catch (e) {
       print('API Error (brain): $e');
@@ -64,7 +65,7 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/brain/memory'))
           .timeout(timeout);
-      
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
@@ -81,7 +82,7 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/gallery?limit=$limit'))
           .timeout(timeout);
-      
+
       if (response.statusCode == 200) {
         return List<String>.from(jsonDecode(response.body));
       }
@@ -100,7 +101,8 @@ class ApiService {
 
   // ============ ELEVATOR ============
   // Asansör move komutu (up/down/rack)
-  Future<bool> elevatorMove({String? direction, int? rack, int steps = 500}) async {
+  Future<bool> elevatorMove(
+      {String? direction, int? rack, int steps = 500}) async {
     try {
       final body = <String, dynamic>{};
       if (rack != null) {
@@ -109,7 +111,7 @@ class ApiService {
         body['direction'] = direction;
         body['steps'] = steps;
       }
-      
+
       final response = await http
           .post(
             Uri.parse('$baseUrl/api/elevator/move'),
@@ -117,7 +119,7 @@ class ApiService {
             body: jsonEncode(body),
           )
           .timeout(timeout);
-      
+
       return response.statusCode == 200;
     } catch (e) {
       print('API Error (elevator move): $e');
@@ -165,7 +167,8 @@ class ApiService {
   }
 
   // Eski API (uyumluluk için)
-  Future<bool> sendElevatorCommand(String cmd, {Map<String, dynamic>? params}) async {
+  Future<bool> sendElevatorCommand(String cmd,
+      {Map<String, dynamic>? params}) async {
     switch (cmd) {
       case 'go_to_rack':
         return elevatorGoToRack(params?['rack'] ?? 1);
@@ -187,7 +190,7 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/elevator/status'))
           .timeout(timeout);
-      
+
       if (response.statusCode == 200) {
         return ElevatorStatus.fromJson(jsonDecode(response.body));
       }
@@ -206,7 +209,7 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/move/$direction'))
           .timeout(timeout);
-      
+
       return response.statusCode == 200;
     } catch (e) {
       print('API Error (ptz): $e');
@@ -222,9 +225,8 @@ class ApiService {
   // PTZ'yi home pozisyonuna döndür
   Future<bool> ptzGoHome() async {
     try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/api/ptz/home'))
-          .timeout(timeout);
+      final response =
+          await http.get(Uri.parse('$baseUrl/api/ptz/home')).timeout(timeout);
       return response.statusCode == 200;
     } catch (e) {
       print('API Error (ptz home): $e');
@@ -264,7 +266,7 @@ class ApiService {
       final response = await http
           .post(Uri.parse('$baseUrl/api/capture'))
           .timeout(const Duration(seconds: 20));
-      
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
@@ -281,11 +283,12 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/reports/stats'))
           .timeout(timeout);
-      
+
       if (response.statusCode == 200) {
         return ReportStats.fromJson(jsonDecode(response.body));
       }
-      return ReportStats(hourlyCount: 0, dailyCount: 0, weeklyCount: 0, monthlyCount: 0);
+      return ReportStats(
+          hourlyCount: 0, dailyCount: 0, weeklyCount: 0, monthlyCount: 0);
     } catch (e) {
       print('API Error (report stats): $e');
       rethrow;
@@ -297,7 +300,7 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/reports/hourly'))
           .timeout(timeout);
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -316,7 +319,7 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/reports/daily'))
           .timeout(timeout);
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
@@ -335,7 +338,7 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/reports/weekly'))
           .timeout(timeout);
-      
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body) ?? [];
       }
@@ -350,7 +353,7 @@ class ApiService {
       final response = await http
           .get(Uri.parse('$baseUrl/api/reports/monthly'))
           .timeout(timeout);
-      
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body) ?? [];
       }
@@ -363,10 +366,9 @@ class ApiService {
   // ============ HEALTH ============
   Future<Map<String, dynamic>> getHealth() async {
     try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/api/health'))
-          .timeout(timeout);
-      
+      final response =
+          await http.get(Uri.parse('$baseUrl/api/health')).timeout(timeout);
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
