@@ -13,14 +13,25 @@ class SensorData {
   });
 
   factory SensorData.fromJson(Map<String, dynamic> json) {
+    // racks hem List hem de Map olarak gelebilir
+    List<RackData> racksList = [];
+    final racksData = json['racks'];
+    if (racksData is List) {
+      racksList = racksData.map((r) => RackData.fromJson(r)).toList();
+    } else if (racksData is Map) {
+      // Map ise key'leri kullanarak RackData oluştur
+      racksData.forEach((key, value) {
+        if (value is Map<String, dynamic>) {
+          racksList.add(RackData.fromJson({...value, 'id': key}));
+        }
+      });
+    }
+
     return SensorData(
       cabin: CabinData.fromJson(json['cabin'] ?? {}),
       water: WaterData.fromJson(json['water'] ?? {}),
-      racks: (json['racks'] as List<dynamic>?)
-              ?.map((r) => RackData.fromJson(r))
-              .toList() ??
-          [],
-      time: json['time'] ?? '',
+      racks: racksList,
+      time: json['ts']?.toString() ?? json['time']?.toString() ?? '',
     );
   }
 
@@ -47,9 +58,9 @@ class CabinData {
 
   factory CabinData.fromJson(Map<String, dynamic> json) {
     return CabinData(
-      temperature: (json['temperature'] ?? 0).toDouble(),
+      temperature: (json['temperature'] ?? json['temp'] ?? 0).toDouble(),
       humidity: (json['humidity'] ?? 0).toDouble(),
-      co2: (json['co2'] ?? 0).toInt(),
+      co2: (json['co2'] ?? json['light'] ?? 0).toInt(),
     );
   }
 
@@ -75,7 +86,7 @@ class WaterData {
     return WaterData(
       ph: (json['ph'] ?? 0).toDouble(),
       ec: (json['ec'] ?? 0).toDouble(),
-      temperature: (json['temperature'] ?? 0).toDouble(),
+      temperature: (json['temperature'] ?? json['temp'] ?? 0).toDouble(),
       level: (json['level'] ?? 0).toInt(),
     );
   }
