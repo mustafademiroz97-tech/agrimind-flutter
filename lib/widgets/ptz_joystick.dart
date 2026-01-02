@@ -24,7 +24,7 @@ class PtzJoystick extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               border: Border.all(color: Colors.grey[700]!),
             ),
           ),
@@ -73,7 +73,7 @@ class PtzJoystick extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.green.withOpacity(0.2),
+                color: Colors.green.withValues(alpha: 0.2),
                 border: Border.all(color: Colors.green),
               ),
               child: const Icon(Icons.home, color: Colors.green, size: 20),
@@ -94,7 +94,7 @@ class PtzJoystick extends StatelessWidget {
         height: 36,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.blue.withOpacity(0.2),
+          color: Colors.blue.withValues(alpha: 0.2),
           border: Border.all(color: Colors.blue),
         ),
         child: Icon(icon, color: Colors.blue, size: 20),

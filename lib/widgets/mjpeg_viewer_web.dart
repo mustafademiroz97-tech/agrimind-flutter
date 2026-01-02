@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_web_libraries_in_flutter
+// ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
@@ -111,7 +111,9 @@ class _MjpegViewerPlatformState extends State<MjpegViewerPlatform> {
                   const Icon(Icons.videocam_off, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
-                    _errorMessage.isEmpty ? 'Kamera bağlantısı yok' : _errorMessage,
+                    _errorMessage.isEmpty
+                        ? 'Kamera bağlantısı yok'
+                        : _errorMessage,
                     style: const TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                   const SizedBox(height: 16),

@@ -50,79 +50,8 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Sunucu: ${provider.currentServerUrl}',
+                        'Sunucu: ${ApiService.baseUrl}', // Her zaman doğru URL'i göster
                         style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Bağlantı Modu
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Bağlantı Modu',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      
-                      // Local
-                      RadioListTile<bool>(
-                        title: const Text('🏠 Yerel (LAN)'),
-                        subtitle: Text(
-                          ApiService.localUrl,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        value: false,
-                        groupValue: provider.isRemoteMode,
-                        onChanged: (v) => provider.setConnectionMode(false),
-                      ),
-                      
-                      // Remote
-                      RadioListTile<bool>(
-                        title: const Text('🌐 İnternet (Cloudflare)'),
-                        subtitle: Text(
-                          ApiService.remoteUrl,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        value: true,
-                        groupValue: provider.isRemoteMode,
-                        onChanged: (v) => provider.setConnectionMode(true),
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      // Otomatik seç butonu
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Sunucu test ediliyor...')),
-                            );
-                            await provider.autoSelectServer();
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    provider.isConnected 
-                                        ? '✅ ${provider.isRemoteMode ? "Remote" : "Local"} bağlantı başarılı' 
-                                        : '❌ Bağlantı kurulamadı',
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.autorenew),
-                          label: const Text('Otomatik Seç'),
-                        ),
                       ),
                     ],
                   ),
@@ -143,7 +72,7 @@ class SettingsScreen extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      _infoRow('Versiyon', '1.0.0'),
+                      _infoRow('Versiyon', '1.1.0'), // Versiyon güncellendi
                       _infoRow('Backend', 'Raspberry Pi 4'),
                       _infoRow('Kamera', 'Tapo C200 PTZ'),
                       _infoRow('AI Model', 'Gemini 2.5 Flash'),
@@ -166,9 +95,8 @@ class SettingsScreen extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      _copyableUrl(context, 'Local', ApiService.localUrl),
-                      _copyableUrl(context, 'Remote', ApiService.remoteUrl),
-                      _copyableUrl(context, 'Video Feed', '${provider.currentServerUrl}/video_feed'),
+                      _copyableUrl(context, 'API Sunucusu', ApiService.baseUrl),
+                      _copyableUrl(context, 'Video Akışı', '${ApiService.baseUrl}/video_feed'),
                     ],
                   ),
                 ),

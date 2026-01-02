@@ -1,0 +1,17 @@
+{
+  "dart.analysisExcludedFolders": [
+    "/home/admin/flutter",
+    "/home/admin/android-sdk",
+    "/home/admin/.pub-cache"
+  ],
+  "files.exclude": {
+    "**/build/": true,
+    "**/.dart_tool/": true,
+    "**/android/.gradle/": true,
+    "**/ios/Pods/": true
+  },
+  "files.watcherExclude": {
+    "**/build/**": true,
+    "**/.dart_tool/**": true
+  }
+}

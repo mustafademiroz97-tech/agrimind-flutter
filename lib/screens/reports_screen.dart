@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../models/report.dart';
 
@@ -146,7 +145,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                       children: report.rackHealths.entries.map((e) {
                         return Chip(
                           label: Text('${e.key}: ${e.value}'),
-                          backgroundColor: _healthColor(e.value.toDouble()).withOpacity(0.2),
+                          backgroundColor: _healthColor(e.value.toDouble()).withValues(alpha: 0.2),
                         );
                       }).toList(),
                     ),
@@ -242,7 +241,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.green.withOpacity(0.2),
+                backgroundColor: Colors.green.withValues(alpha: 0.2),
                 child: Text('${index + 1}'),
               ),
               title: Text(report['period'] ?? report['week'] ?? report['month'] ?? '$type ${index + 1}'),
@@ -294,7 +293,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color),
       ),
@@ -304,7 +303,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           Icon(Icons.favorite, size: 14, color: color),
           const SizedBox(width: 4),
           Text(
-            '${health.toStringAsFixed(0)}',
+            health.toStringAsFixed(0),
             style: TextStyle(color: color, fontWeight: FontWeight.bold),
           ),
         ],

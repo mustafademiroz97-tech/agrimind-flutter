@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
@@ -58,30 +59,30 @@ class _ControlScreenState extends State<ControlScreen> {
                     _buildSectionTitle('📡 Sistem Durumu'),
                     const SizedBox(height: 8),
                     _buildSystemStatus(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Hızlı Aksiyonlar
                     _buildSectionTitle('⚡ Hızlı Aksiyonlar'),
                     const SizedBox(height: 8),
                     _buildQuickActions(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Asansör Kontrol
                     _buildSectionTitle('🛗 Asansör'),
                     const SizedBox(height: 8),
                     _buildElevatorSection(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Manuel Kontroller
                     _buildSectionTitle('🔧 Manuel Kontroller'),
                     const SizedBox(height: 8),
                     _buildManualControls(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Ayarlar
                     _buildSectionTitle('⚙️ Ayarlar'),
                     const SizedBox(height: 8),
@@ -106,8 +107,9 @@ class _ControlScreenState extends State<ControlScreen> {
   Widget _buildSystemStatus() {
     final status = _healthData?['status'] ?? 'unknown';
     final isOk = status == 'ok';
-    final agentStatus = _healthData?['agent_status'] as Map<String, dynamic>? ?? {};
-    
+    final agentStatus =
+        _healthData?['agent_status'] as Map<String, dynamic>? ?? {};
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -192,7 +194,7 @@ class _ControlScreenState extends State<ControlScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
-            color: (isOk ? Colors.green : Colors.orange).withOpacity(0.2),
+            color: (isOk ? Colors.green : Colors.orange).withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -255,13 +257,14 @@ class _ControlScreenState extends State<ControlScreen> {
     );
   }
 
-  Widget _actionButton(String label, IconData icon, Color color, VoidCallback onTap) {
+  Widget _actionButton(
+      String label, IconData icon, Color color, VoidCallback onTap) {
     return ElevatedButton.icon(
       onPressed: onTap,
       icon: Icon(icon, size: 18),
       label: Text(label),
       style: ElevatedButton.styleFrom(
-        backgroundColor: color.withOpacity(0.2),
+        backgroundColor: color.withValues(alpha: 0.2),
         foregroundColor: color,
       ),
     );
@@ -296,11 +299,12 @@ class _ControlScreenState extends State<ControlScreen> {
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: status.moving
-                            ? Colors.orange.withOpacity(0.2)
-                            : Colors.green.withOpacity(0.2),
+                            ? Colors.orange.withValues(alpha: 0.2)
+                            : Colors.green.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -314,7 +318,8 @@ class _ControlScreenState extends State<ControlScreen> {
                           Text(
                             status.moving ? 'Hareket' : 'Hazır',
                             style: TextStyle(
-                              color: status.moving ? Colors.orange : Colors.green,
+                              color:
+                                  status.moving ? Colors.orange : Colors.green,
                             ),
                           ),
                         ],
@@ -329,9 +334,8 @@ class _ControlScreenState extends State<ControlScreen> {
                     final rack = index + 1;
                     final isActive = status.rack == rack;
                     return ElevatedButton(
-                      onPressed: status.moving
-                          ? null
-                          : () => provider.goToRack(rack),
+                      onPressed:
+                          status.moving ? null : () => provider.goToRack(rack),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isActive
                             ? Theme.of(context).colorScheme.primary
@@ -398,7 +402,8 @@ class _ControlScreenState extends State<ControlScreen> {
             onChanged: (v) {
               // TODO: API çağrısı
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Kontrol API\'si henüz hazır değil')),
+                const SnackBar(
+                    content: Text('Kontrol API\'si henüz hazır değil')),
               );
             },
           ),
@@ -409,7 +414,7 @@ class _ControlScreenState extends State<ControlScreen> {
 
   Widget _buildSettings() {
     final photoInterval = _healthData?['photo_interval_seconds'] ?? 7200;
-    
+
     return Card(
       child: Column(
         children: [
@@ -455,19 +460,23 @@ class _ControlScreenState extends State<ControlScreen> {
           children: [
             ListTile(
               title: const Text('30 Dakika'),
-              leading: Radio<int>(value: 1800, groupValue: current, onChanged: (v) {}),
+              leading: Radio<int>(
+                  value: 1800, groupValue: current, onChanged: (v) {}),
             ),
             ListTile(
               title: const Text('1 Saat'),
-              leading: Radio<int>(value: 3600, groupValue: current, onChanged: (v) {}),
+              leading: Radio<int>(
+                  value: 3600, groupValue: current, onChanged: (v) {}),
             ),
             ListTile(
               title: const Text('2 Saat'),
-              leading: Radio<int>(value: 7200, groupValue: current, onChanged: (v) {}),
+              leading: Radio<int>(
+                  value: 7200, groupValue: current, onChanged: (v) {}),
             ),
             ListTile(
               title: const Text('4 Saat'),
-              leading: Radio<int>(value: 14400, groupValue: current, onChanged: (v) {}),
+              leading: Radio<int>(
+                  value: 14400, groupValue: current, onChanged: (v) {}),
             ),
           ],
         ),

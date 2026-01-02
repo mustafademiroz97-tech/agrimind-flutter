@@ -24,8 +24,8 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.agrimind.agrimind_app"
-    compileSdk 34
-    ndkVersion "25.1.8937393"
+    compileSdk 36
+    ndkVersion "27.0.12077973"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId "com.agrimind.agrimind_app"
-        minSdk 21
+        minSdkVersion flutter.minSdkVersion
         targetSdk 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

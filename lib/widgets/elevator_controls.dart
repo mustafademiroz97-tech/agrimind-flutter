@@ -17,7 +17,7 @@ class ElevatorControls extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -121,8 +121,8 @@ class ElevatorControls extends StatelessWidget {
       message: tooltip,
       child: Material(
         color: isStop
-            ? Colors.red.withOpacity(0.2)
-            : Theme.of(context).colorScheme.surfaceVariant,
+            ? Colors.red.withValues(alpha: 0.2)
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         shape: const CircleBorder(),
         child: InkWell(
           onTap: disabled && !isStop ? null : onPressed,

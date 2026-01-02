@@ -29,12 +29,12 @@ class SensorGauge extends StatelessWidget {
     final isOptimal = value >= optimal[0] && value <= optimal[1];
     final isLow = value < optimal[0];
     final isHigh = value > optimal[1];
-    
+
     Color statusColor;
     if (isOptimal) {
       statusColor = Colors.green;
     } else if ((isLow && value < min + (optimal[0] - min) * 0.5) ||
-               (isHigh && value > optimal[1] + (max - optimal[1]) * 0.5)) {
+        (isHigh && value > optimal[1] + (max - optimal[1]) * 0.5)) {
       statusColor = Colors.red;
     } else {
       statusColor = Colors.orange;
@@ -104,7 +104,7 @@ class SensorGauge extends StatelessWidget {
                   child: Container(
                     width: 2,
                     height: 6,
-                    color: Colors.green.withOpacity(0.5),
+                    color: Colors.green.withValues(alpha: 0.5),
                   ),
                 ),
                 Positioned(
@@ -112,7 +112,7 @@ class SensorGauge extends StatelessWidget {
                   child: Container(
                     width: 2,
                     height: 6,
-                    color: Colors.green.withOpacity(0.5),
+                    color: Colors.green.withValues(alpha: 0.5),
                   ),
                 ),
               ],

@@ -6,30 +6,23 @@ import '../models/elevator_status.dart';
 import '../models/report.dart';
 
 class ApiService {
-  // Varsayılan URL'ler
-  static const String localUrl = 'http://192.168.0.3:5000';
-  static const String remoteUrl = 'https://api.neuraponic.com';
-  
-  // Aktif URL - başlangıçta REMOTE (dışarıdan erişim için)
-  static String _baseUrl = remoteUrl;
-  static bool _isRemote = true;
-  
+  // URL'ler artık sadece remote olacak şekilde sabitlendi.
+  static const String _baseUrl = 'https://api.neuraponic.com';
+
   static String get baseUrl => _baseUrl;
-  static bool get isRemote => _isRemote;
-  
-  // URL'i manuel değiştir
+  static bool get isRemote => true; // Her zaman remote moddayız.
+
+  // URL'i manuel değiştirme fonksiyonları kaldırıldı veya etkisiz hale getirildi.
   static void setRemoteMode(bool remote) {
-    _isRemote = remote;
-    _baseUrl = remote ? remoteUrl : localUrl;
+    // Bu fonksiyon artık bir işe yaramayacak.
   }
-  
-  // Direkt URL ayarla
+
   static void setBaseUrl(String url) {
-    _baseUrl = url;
+    // Bu fonksiyon artık bir işe yaramayacak.
   }
-  
+
   // Timeout süresi
-  static const Duration timeout = Duration(seconds: 10);
+  static const Duration timeout = Duration(seconds: 15); // Timeout biraz artırıldı.
 
   // ============ SENSORS ============
   Future<SensorData> getMetrics() async {

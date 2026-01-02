@@ -9,7 +9,7 @@ class RackCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final healthColor = _getHealthColor(rack.healthScore);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -27,9 +27,10 @@ class RackCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: healthColor.withOpacity(0.2),
+                    color: healthColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: healthColor),
                   ),
@@ -56,9 +57,12 @@ class RackCard extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildMetricRow(Icons.thermostat, 'Sıcaklık', '${rack.temperature.toStringAsFixed(1)}°C'),
-                  _buildMetricRow(Icons.water_drop, 'Nem', '${rack.humidity.toStringAsFixed(0)}%'),
-                  _buildMetricRow(Icons.light_mode, 'Işık', '${rack.light} lux'),
+                  _buildMetricRow(Icons.thermostat, 'Sıcaklık',
+                      '${rack.temperature.toStringAsFixed(1)}°C'),
+                  _buildMetricRow(Icons.water_drop, 'Nem',
+                      '${rack.humidity.toStringAsFixed(0)}%'),
+                  _buildMetricRow(
+                      Icons.light_mode, 'Işık', '${rack.light} lux'),
                 ],
               ),
             ),
@@ -73,8 +77,11 @@ class RackCard extends StatelessWidget {
       children: [
         Icon(icon, size: 14, color: Colors.grey),
         const SizedBox(width: 4),
-        Expanded(child: Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey))),
-        Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        Expanded(
+            child: Text(label,
+                style: const TextStyle(fontSize: 11, color: Colors.grey))),
+        Text(value,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
       ],
     );
   }
