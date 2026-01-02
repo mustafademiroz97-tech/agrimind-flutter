@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
@@ -29,27 +30,30 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // MQTT bağlantısını başlat
+    // MQTT bağlantısını başlat (sadece mobile platformlarda)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final mqtt = context.read<MqttService>();
-      mqtt.connect();
-      
-      // MQTT event'lerini dinle
-      _setupMqttListeners(mqtt);
+      // Web platformunda MQTT kullanma
+      if (!kIsWeb) {
+        final mqtt = context.read<MqttService>();
+        mqtt.connect();
+
+        // MQTT event'lerini dinle
+        _setupMqttListeners(mqtt);
+      }
     });
   }
 
   void _setupMqttListeners(MqttService mqtt) {
     final provider = context.read<AppProvider>();
-    
+
     mqtt.sensorStream.listen((data) {
       provider.updateSensorData(data);
     });
-    
+
     mqtt.elevatorStream.listen((status) {
       provider.updateElevatorStatus(status);
     });
-    
+
     mqtt.alertStream.listen((alert) {
       provider.addAlert(alert);
       _showAlertSnackbar(alert);

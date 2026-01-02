@@ -8,42 +8,42 @@ import '../services/api_service.dart';
 
 class AppProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
-  
+
   // Sensör verileri
   SensorData _sensorData = SensorData.empty();
   SensorData get sensorData => _sensorData;
-  
+
   // Asansör durumu
   ElevatorStatus _elevatorStatus = ElevatorStatus.empty();
   ElevatorStatus get elevatorStatus => _elevatorStatus;
-  
+
   // Chat mesajları
   final List<ChatMessage> _chatMessages = [];
   List<ChatMessage> get chatMessages => _chatMessages;
-  
+
   // Galeri
   List<String> _galleryImages = [];
   List<String> get galleryImages => _galleryImages;
-  
+
   // Alertler
   final List<BrainAlert> _alerts = [];
   List<BrainAlert> get alerts => _alerts;
-  
+
   // Loading states
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-  
+
   bool _isChatLoading = false;
   bool get isChatLoading => _isChatLoading;
-  
+
   // Bağlantı durumu
   bool _isConnected = false;
   bool get isConnected => _isConnected;
-  
+
   // Remote/Local mod
   bool get isRemoteMode => ApiService.isRemote;
   String get currentServerUrl => ApiService.baseUrl;
-  
+
   String? _error;
   String? get error => _error;
 
@@ -53,46 +53,28 @@ class AppProvider extends ChangeNotifier {
     _startPeriodicRefresh();
     _loadInitialData();
   }
-  
-  // Bağlantı modunu değiştir
+
+  // Bağlantı modunu değiştir - artık sadece remote mod kullanılıyor
   void setConnectionMode(bool remote) {
-    ApiService.setRemoteMode(remote);
     notifyListeners();
-    refreshSensorData(); // Yeni sunucuyla test et
+    refreshSensorData();
   }
-  
-  // Otomatik sunucu seç (remote önce - dışarıdan erişim için)
+
+  // Sunucu bağlantısını test et
   Future<void> autoSelectServer() async {
     _error = null;
-    
-    // Önce REMOTE dene (dışarıdan erişim öncelikli)
-    ApiService.setRemoteMode(true);
+
     try {
-      debugPrint('Testing remote: ${ApiService.baseUrl}');
+      debugPrint('Testing API: ${ApiService.baseUrl}');
       await _api.getMetrics().timeout(const Duration(seconds: 15));
       _isConnected = true;
       _error = null;
-      debugPrint('Remote connection successful');
+      debugPrint('API connection successful');
       notifyListeners();
-      return;
     } catch (e) {
-      debugPrint('Remote failed: $e');
-    }
-    
-    // Remote başarısız, local dene
-    ApiService.setRemoteMode(false);
-    try {
-      debugPrint('Testing local: ${ApiService.baseUrl}');
-      await _api.getMetrics().timeout(const Duration(seconds: 5));
-      _isConnected = true;
-      _error = null;
-      debugPrint('Local connection successful');
-      notifyListeners();
-      return;
-    } catch (e) {
-      debugPrint('Local failed: $e');
+      debugPrint('API connection failed: $e');
       _isConnected = false;
-      _error = e.toString();
+      _error = 'API bağlantısı başarısız: $e';
       notifyListeners();
     }
   }
@@ -119,7 +101,8 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isConnected = false;
-      _error = 'Bağlantı hatası';
+      _error = 'API Hatası: $e';
+      debugPrint('refreshSensorData error: $e');
       notifyListeners();
     }
   }
@@ -132,7 +115,7 @@ class AppProvider extends ChangeNotifier {
   // ============ CHAT ============
   Future<void> sendChatMessage(String message) async {
     if (message.trim().isEmpty) return;
-    
+
     // Kullanıcı mesajını ekle
     _chatMessages.add(ChatMessage(text: message, isUser: true));
     _isChatLoading = true;
@@ -140,7 +123,7 @@ class AppProvider extends ChangeNotifier {
 
     try {
       final response = await _api.askBrain(message);
-      
+
       if (response.isSuccess && response.answer != null) {
         _chatMessages.add(ChatMessage(
           text: response.answer!,
@@ -193,7 +176,8 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<bool> goToRack(int rack) async {
-    final success = await _api.sendElevatorCommand('go_to_rack', params: {'rack': rack});
+    final success =
+        await _api.sendElevatorCommand('go_to_rack', params: {'rack': rack});
     if (success) {
       await Future.delayed(const Duration(milliseconds: 500));
       await refreshElevatorStatus();
@@ -240,7 +224,7 @@ class AppProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> capturePhoto() async {
     _isLoading = true;
     notifyListeners();
-    
+
     try {
       final result = await _api.capturePhoto();
       await refreshGallery();

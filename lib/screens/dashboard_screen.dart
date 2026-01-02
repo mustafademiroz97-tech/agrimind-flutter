@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
@@ -32,16 +33,17 @@ class DashboardScreen extends StatelessWidget {
               ],
             ),
           ),
-          Consumer<MqttService>(
-            builder: (context, mqtt, _) => IconButton(
-              icon: Icon(
-                mqtt.isConnected ? Icons.cloud_done : Icons.cloud_off,
-                color: mqtt.isConnected ? Colors.green : Colors.red,
+          if (!kIsWeb)
+            Consumer<MqttService>(
+              builder: (context, mqtt, _) => IconButton(
+                icon: Icon(
+                  mqtt.isConnected ? Icons.cloud_done : Icons.cloud_off,
+                  color: mqtt.isConnected ? Colors.green : Colors.red,
+                ),
+                onPressed: () => mqtt.connect(),
+                tooltip: mqtt.isConnected ? 'MQTT Bağlı' : 'MQTT Bağlantı Yok',
               ),
-              onPressed: () => mqtt.connect(),
-              tooltip: mqtt.isConnected ? 'MQTT Bağlı' : 'MQTT Bağlantı Yok',
             ),
-          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => context.read<AppProvider>().refreshSensorData(),
@@ -59,7 +61,7 @@ class DashboardScreen extends StatelessWidget {
       body: Consumer<AppProvider>(
         builder: (context, provider, _) {
           final data = provider.sensorData;
-          
+
           return RefreshIndicator(
             onRefresh: provider.refreshSensorData,
             child: SingleChildScrollView(
@@ -85,7 +87,7 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                  
+
                   // Kabin Ortamı
                   _buildSectionTitle('🏠 Kabin Ortamı'),
                   const SizedBox(height: 8),
@@ -131,9 +133,9 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Su Tankı
                   _buildSectionTitle('💧 Su Tankı'),
                   const SizedBox(height: 8),
@@ -181,21 +183,22 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   // Su seviyesi bar
                   _buildWaterLevelBar(data.water.level),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Raflar
                   _buildSectionTitle('🌿 Raf Durumları'),
                   const SizedBox(height: 8),
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 1.2,
                       crossAxisSpacing: 12,
@@ -206,9 +209,9 @@ class DashboardScreen extends StatelessWidget {
                       return RackCard(rack: data.racks[index]);
                     },
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Son güncelleme
                   Center(
                     child: Text(
