@@ -39,12 +39,15 @@ class _MjpegViewerPlatformState extends State<MjpegViewerPlatform> {
     ui_web.platformViewRegistry.registerViewFactory(
       _viewId,
       (int viewId) {
+        // MJPEG stream için img tag kullan - her seferinde yeni URL ile cache bypass
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
         final img = html.ImageElement()
-          ..src = widget.streamUrl
+          ..src = '${widget.streamUrl}?t=$timestamp'
           ..style.width = '100%'
           ..style.height = '100%'
           ..style.objectFit = 'contain'
-          ..style.backgroundColor = 'black';
+          ..style.backgroundColor = 'black'
+          ..crossOrigin = 'anonymous';
 
         img.onLoad.listen((_) {
           if (mounted) {

@@ -17,13 +17,15 @@ class ElevatorStatus {
   });
 
   factory ElevatorStatus.fromJson(Map<String, dynamic> json) {
+    // API yanıtı { elevator: {...}, status: 'ok' } şeklinde geliyor
+    final elevatorData = json['elevator'] ?? json;
     return ElevatorStatus(
-      status: json['status'] ?? 'unknown',
-      position: json['position'] ?? 0,
-      rack: json['rack'] ?? 1,
-      moving: json['moving'] ?? false,
-      homed: json['homed'] ?? false,
-      autoScan: json['auto_scan'] ?? false,
+      status: elevatorData['status'] ?? 'unknown',
+      position: elevatorData['position'] ?? 0,
+      rack: elevatorData['rack'] ?? 1,
+      moving: elevatorData['moving'] ?? false,
+      homed: elevatorData['homed'] ?? false,
+      autoScan: elevatorData['auto_scan'] ?? false,
     );
   }
 
