@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
@@ -30,17 +29,28 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // MQTT bağlantısını başlat (sadece mobile platformlarda)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Web platformunda MQTT kullanma
-      if (!kIsWeb) {
-        final mqtt = context.read<MqttService>();
-        mqtt.connect();
+      _initializeConnections();
+    });
+  }
 
-        // MQTT event'lerini dinle
+  Future<void> _initializeConnections() async {
+    final provider = context.read<AppProvider>();
+    final mqtt = context.read<MqttService>();
+    
+    // Her zaman HTTP polling başlat (fallback)
+    provider.startPolling();
+    
+    // MQTT bağlantısını dene (yerel ağ için)
+    try {
+      await mqtt.connect().timeout(const Duration(seconds: 3));
+      if (mqtt.isConnected) {
+        debugPrint('✅ MQTT bağlı - yerel ağ modu');
         _setupMqttListeners(mqtt);
       }
-    });
+    } catch (e) {
+      debugPrint('ℹ️ MQTT bağlanamadı - HTTP API modu: $e');
+    }
   }
 
   void _setupMqttListeners(MqttService mqtt) {
@@ -73,11 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: alert.severityColor,
         duration: const Duration(seconds: 5),
-        action: SnackBarAction(
-          label: 'KAPAT',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
       ),
     );
   }

@@ -100,6 +100,15 @@ class AppProvider extends ChangeNotifier {
     await refreshElevatorStatus();
   }
 
+  // HTTP Polling başlat (MQTT yerine)
+  void startPolling() {
+    // Zaten constructor'da başlatılıyor ama explicit çağrı için
+    if (_refreshTimer == null || !_refreshTimer!.isActive) {
+      _startPeriodicRefresh();
+    }
+    _loadInitialData();
+  }
+
   // ============ SENSOR DATA ============
   Future<void> refreshSensorData() async {
     try {

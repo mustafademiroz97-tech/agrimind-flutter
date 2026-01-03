@@ -43,13 +43,15 @@ class MqttService extends ChangeNotifier {
     } else {
       _client = MqttServerClient(broker, clientId);
       (_client as MqttServerClient).port = tcpPort;
+      // Bağlantı timeout'u kısa tut
+      (_client as MqttServerClient).connectTimeoutPeriod = 3000;
     }
 
     _client!.keepAlivePeriod = 60;
     _client!.onConnected = _onConnected;
     _client!.onDisconnected = _onDisconnected;
     _client!.logging(on: false);
-    _client!.autoReconnect = true;
+    _client!.autoReconnect = false; // Manuel kontrol edeceğiz
 
     final connMessage = MqttConnectMessage()
         .withClientIdentifier(
@@ -59,11 +61,11 @@ class MqttService extends ChangeNotifier {
     _client!.connectionMessage = connMessage;
 
     try {
-      await _client!.connect();
+      await _client!.connect().timeout(const Duration(seconds: 3));
     } catch (e) {
-      print('MQTT Connection failed: $e');
-      _client!.disconnect();
-      _scheduleReconnect();
+      print('MQTT: Yerel ağa bağlanılamadı (normal) - $e');
+      _client?.disconnect();
+      // Sessizce geç, HTTP API çalışacak
     }
   }
 
