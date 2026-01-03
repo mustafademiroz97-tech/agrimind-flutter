@@ -62,8 +62,7 @@ class _MjpegViewerPlatformState extends State<MjpegViewerPlatform> {
 
   void _startPolling() {
     _fetchFrame();
-    // Her 200ms'de bir frame çek (5 FPS)
-    _pollingTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+    _pollingTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
       _fetchFrame();
     });
   }
@@ -76,14 +75,15 @@ class _MjpegViewerPlatformState extends State<MjpegViewerPlatform> {
     if (!mounted) return;
 
     try {
-      // Snapshot URL'i oluştur (video_feed yerine camera/snapshot kullan)
+      // Snapshot URL oluştur
       String snapshotUrl = widget.streamUrl;
       if (snapshotUrl.contains('/video_feed')) {
         snapshotUrl = snapshotUrl.replaceAll('/video_feed', '/api/camera/snapshot');
       }
       
       // Cache bypass için timestamp ekle
-      final url = '\$snapshotUrl?t=\${DateTime.now().millisecondsSinceEpoch}';
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final url = '$snapshotUrl?t=$timestamp';
       
       final response = await http.get(
         Uri.parse(url),
@@ -100,7 +100,7 @@ class _MjpegViewerPlatformState extends State<MjpegViewerPlatform> {
           _retryCount = 0;
         });
       } else {
-        _handleError('HTTP \${response.statusCode}');
+        _handleError('HTTP ${response.statusCode}');
       }
     } catch (e) {
       _handleError(e.toString());
@@ -155,7 +155,6 @@ class _MjpegViewerPlatformState extends State<MjpegViewerPlatform> {
             width: double.infinity,
             height: double.infinity,
           ),
-          // Live indicator
           if (widget.isLive)
             Positioned(
               top: 8,
@@ -166,19 +165,12 @@ class _MjpegViewerPlatformState extends State<MjpegViewerPlatform> {
                   color: Colors.red.withOpacity(0.8),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Text(
+                    Icon(Icons.circle, size: 8, color: Colors.white),
+                    SizedBox(width: 4),
+                    Text(
                       'CANLI',
                       style: TextStyle(
                         color: Colors.white,

@@ -215,19 +215,37 @@ class AppProvider extends ChangeNotifier {
     final success =
         await _api.sendElevatorCommand('go_to_rack', params: {'rack': rack});
     if (success) {
-      await Future.delayed(const Duration(milliseconds: 500));
-      await refreshElevatorStatus();
+      // Hareket başladı - düzenli durum güncellemesi yap
+      _pollElevatorUntilStopped();
     }
     return success;
   }
 
+  // Asansör duruncaya kadar durumu güncelle
+  void _pollElevatorUntilStopped() async {
+    for (int i = 0; i < 30; i++) { // Max 30 saniye
+      await Future.delayed(const Duration(seconds: 1));
+      await refreshElevatorStatus();
+      if (!_elevatorStatus.moving) break;
+    }
+  }
+
   Future<bool> moveElevator(String direction, {int steps = 500}) async {
     final cmd = direction == 'up' ? 'move_up' : 'move_down';
-    return await _api.sendElevatorCommand(cmd, params: {'steps': steps});
+    final success = await _api.sendElevatorCommand(cmd, params: {'steps': steps});
+    if (success) {
+      _pollElevatorUntilStopped();
+    }
+    return success;
   }
 
   Future<bool> stopElevator() async {
-    return await _api.sendElevatorCommand('stop');
+    final success = await _api.sendElevatorCommand('stop');
+    if (success) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      await refreshElevatorStatus();
+    }
+    return success;
   }
 
   Future<bool> scanAllRacks() async {

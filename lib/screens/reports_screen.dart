@@ -146,9 +146,10 @@ class _HourlyReportCard extends StatelessWidget {
     }
   }
 
-  Color _getHealthColor(int score) {
-    if (score >= 70) return Colors.green;
-    if (score >= 40) return Colors.orange;
+  Color _getHealthColor(dynamic score) {
+    final intScore = (score is num) ? score.toInt() : 0;
+    if (intScore >= 70) return Colors.green;
+    if (intScore >= 40) return Colors.orange;
     return Colors.red;
   }
 
@@ -157,7 +158,9 @@ class _HourlyReportCard extends StatelessWidget {
     final time = _formatTime(report['time'] ?? report['created']);
     final racks = report['racks'] as Map<String, dynamic>? ?? {};
     final sensors = report['sensors'] as Map<String, dynamic>? ?? {};
-    final avgHealth = report['avg_health'] ?? 0;
+    final avgHealth = (report['avg_health'] is num) 
+        ? (report['avg_health'] as num).toInt() 
+        : 0;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -232,7 +235,9 @@ class _HourlyReportCard extends StatelessWidget {
               const SizedBox(height: 4),
               ...racks.entries.map((e) {
                 final rackData = e.value as Map<String, dynamic>? ?? {};
-                final health = rackData['health'] ?? 0;
+                final health = (rackData['health'] is num) 
+                    ? (rackData['health'] as num).toInt() 
+                    : 0;
                 final disease = rackData['disease'] ?? 'yok';
                 final growth = rackData['growth'] ?? '?';
                 return Padding(
@@ -318,7 +323,9 @@ class _DailyReportCardState extends State<_DailyReportCard> {
     final date = _formatDate(report['date']);
     final text = report['text'] ?? report['summary'] ?? '';
     final scanCount = report['scan_count'] ?? report['analysis_count'] ?? 0;
-    final avgHealth = report['avg_health'] ?? 0;
+    final avgHealth = (report['avg_health'] is num) 
+        ? (report['avg_health'] as num).toInt() 
+        : 0;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
