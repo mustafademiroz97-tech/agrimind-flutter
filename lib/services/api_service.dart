@@ -93,11 +93,62 @@ class ApiService {
     }
   }
 
+  Future<bool> deleteGalleryImage(String filename) async {
+    try {
+      final response = await http
+          .delete(Uri.parse('$baseUrl/api/gallery/$filename'))
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['success'] == true;
+      }
+      return false;
+    } catch (e) {
+      print('API Error (delete image): $e');
+      return false;
+    }
+  }
+
   String getImageUrl(String filename) {
     return '$baseUrl/gallery_files/$filename';
   }
 
   String get videoFeedUrl => '$baseUrl/video_feed';
+
+  // ============ ANALYSES ============
+  Future<List<Map<String, dynamic>>> getAnalyses({int limit = 30}) async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/agent/camera/analyses?limit=$limit'))
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.cast<Map<String, dynamic>>();
+      }
+      return [];
+    } catch (e) {
+      print('API Error (analyses): $e');
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>?> getLastAnalysis() async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/agent/camera/last_analysis'))
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('API Error (last_analysis): $e');
+      return null;
+    }
+  }
 
   // ============ ELEVATOR ============
   // Asansör move komutu (up/down/rack)
@@ -295,16 +346,16 @@ class ApiService {
     }
   }
 
-  Future<List<HourlyReport>> getHourlyReports() async {
+  Future<List<dynamic>> getHourlyReports({int limit = 24}) async {
     try {
       final response = await http
-          .get(Uri.parse('$baseUrl/api/reports/hourly'))
+          .get(Uri.parse('$baseUrl/api/reports/hourly?limit=$limit'))
           .timeout(timeout);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
-          return data.map((r) => HourlyReport.fromJson(r)).toList();
+          return data;
         }
       }
       return [];
@@ -314,16 +365,16 @@ class ApiService {
     }
   }
 
-  Future<List<DailyReport>> getDailyReports() async {
+  Future<List<dynamic>> getDailyReports({int limit = 14}) async {
     try {
       final response = await http
-          .get(Uri.parse('$baseUrl/api/reports/daily'))
+          .get(Uri.parse('$baseUrl/api/reports/daily?limit=$limit'))
           .timeout(timeout);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is List) {
-          return data.map((r) => DailyReport.fromJson(r)).toList();
+          return data;
         }
       }
       return [];
@@ -363,6 +414,45 @@ class ApiService {
     }
   }
 
+  // ============ YAZILI RAPORLAR (Brain) ============
+  Future<List<dynamic>> getWrittenReports({int limit = 30}) async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/brain/reports?limit=$limit'))
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['reports'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      print('API Error (written reports): $e');
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> generateDailyReport({String? date}) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/brain/reports/generate'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'date': date}),
+          )
+          .timeout(
+              const Duration(seconds: 60)); // Rapor oluşturma uzun sürebilir
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      throw Exception('Report generation failed');
+    } catch (e) {
+      print('API Error (generate report): $e');
+      rethrow;
+    }
+  }
+
   // ============ HEALTH ============
   Future<Map<String, dynamic>> getHealth() async {
     try {
@@ -378,5 +468,215 @@ class ApiService {
       rethrow;
     }
   }
+
+  // ============ GROWTH TRACKING (SANAL CETVEL) ============
+  Future<Map<String, dynamic>> getGrowthSummary(int rackId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/growth/summary/$rackId'))
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      throw Exception('Growth summary fetch failed');
+    } catch (e) {
+      print('API Error (growth summary): $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllRacksGrowth() async {
+    try {
+      final response =
+          await http.get(Uri.parse('$baseUrl/api/growth/all')).timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      throw Exception('All racks growth fetch failed');
+    } catch (e) {
+      print('API Error (all growth): $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> recordGrowth(
+      int rack, double heightCm, String source) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/growth/record'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'rack': rack,
+              'height_cm': heightCm,
+              'source': source,
+            }),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      throw Exception('Growth record failed');
+    } catch (e) {
+      print('API Error (record growth): $e');
+      rethrow;
+    }
+  }
+
+  // ============ LIGHT ANALYSIS ============
+  Future<Map<String, dynamic>> analyzePlantLight(
+      double heightCm, int rackId) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/light/analyze'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'plant_height_cm': heightCm,
+              'rack_id': rackId,
+            }),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      throw Exception('Light analysis failed');
+    } catch (e) {
+      print('API Error (light analyze): $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getLightCalibration() async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/light/calibration'))
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      throw Exception('Light calibration fetch failed');
+    } catch (e) {
+      print('API Error (light calibration): $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> updateLightCalibration(
+      List<Map<String, dynamic>> measurementPoints) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/light/calibration'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'measurement_points': measurementPoints,
+              'calibration_date':
+                  DateTime.now().toIso8601String().split('T')[0],
+            }),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      throw Exception('Calibration update failed');
+    } catch (e) {
+      print('API Error (update calibration): $e');
+      rethrow;
+    }
+  }
+
+  // ============ SETTINGS ============
+  Future<Map<String, dynamic>?> getSettings() async {
+    try {
+      final response =
+          await http.get(Uri.parse('$baseUrl/api/settings')).timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('API Error (get settings): $e');
+      return null;
+    }
+  }
+
+  Future<bool> updateSettings(Map<String, dynamic> settings) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/settings'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(settings),
+          )
+          .timeout(timeout);
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('API Error (update settings): $e');
+      return false;
+    }
+  }
+
+  // ============ DOSING (Manual Pumps) ============
+  Future<bool> doPump(String pumpId, int ml) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/dose'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'pump': pumpId,
+              'ml': ml,
+            }),
+          )
+          .timeout(timeout);
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('API Error (dose): $e');
+      return false;
+    }
+  }
+
+  // ============ DEVICE CONTROL ============
+  Future<bool> toggleDevice(String device, bool state) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/device/$device'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'state': state}),
+          )
+          .timeout(timeout);
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('API Error (device control): $e');
+      return false;
+    }
+  }
+
+  Future<Map<String, bool>> getDeviceStates() async {
+    try {
+      final response =
+          await http.get(Uri.parse('$baseUrl/api/devices')).timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Map<String, bool>.from(data);
+      }
+      return {};
+    } catch (e) {
+      print('API Error (get devices): $e');
+      return {};
+    }
+  }
 }
-// Update Thu  1 Jan 23:49:37 +03 2026

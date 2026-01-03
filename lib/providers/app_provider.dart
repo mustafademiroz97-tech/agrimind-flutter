@@ -25,9 +25,17 @@ class AppProvider extends ChangeNotifier {
   List<String> _galleryImages = [];
   List<String> get galleryImages => _galleryImages;
 
+  // Analizler
+  List<Map<String, dynamic>> _analyses = [];
+  List<Map<String, dynamic>> get analyses => _analyses;
+
   // Alertler
   final List<BrainAlert> _alerts = [];
   List<BrainAlert> get alerts => _alerts;
+
+  // Cihaz durumları (light, fan, pump, heater, cooler)
+  Map<String, bool> _deviceStates = {};
+  Map<String, bool> get deviceStates => _deviceStates;
 
   // Loading states
   bool _isLoading = false;
@@ -162,8 +170,27 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> deleteGalleryImage(String filename) async {
+    final success = await _api.deleteGalleryImage(filename);
+    if (success) {
+      _galleryImages.remove(filename);
+      notifyListeners();
+    }
+    return success;
+  }
+
   String getImageUrl(String filename) => _api.getImageUrl(filename);
   String get videoFeedUrl => _api.videoFeedUrl;
+
+  // ============ ANALYSES ============
+  Future<void> refreshAnalyses({int limit = 30}) async {
+    try {
+      _analyses = await _api.getAnalyses(limit: limit);
+      notifyListeners();
+    } catch (e) {
+      print('Analyses error: $e');
+    }
+  }
 
   // ============ ELEVATOR ============
   Future<void> refreshElevatorStatus() async {
@@ -247,6 +274,30 @@ class AppProvider extends ChangeNotifier {
   void clearAlerts() {
     _alerts.clear();
     notifyListeners();
+  }
+
+  // ============ DEVICE CONTROL ============
+  Future<void> loadDeviceStates() async {
+    try {
+      _deviceStates = await _api.getDeviceStates();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('loadDeviceStates error: $e');
+    }
+  }
+
+  Future<bool> toggleDevice(String device, bool state) async {
+    try {
+      final success = await _api.toggleDevice(device, state);
+      if (success) {
+        _deviceStates[device] = state;
+        notifyListeners();
+      }
+      return success;
+    } catch (e) {
+      debugPrint('toggleDevice error: $e');
+      return false;
+    }
   }
 
   @override
