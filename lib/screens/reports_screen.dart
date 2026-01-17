@@ -240,6 +240,12 @@ class _HourlyReportCard extends StatelessWidget {
                     : 0;
                 final disease = rackData['disease'] ?? 'yok';
                 final growth = rackData['growth'] ?? '?';
+                
+                // Bitki yoksa görünürde olmasın - sadece disease="bitki_yok" değilse göster
+                if (disease == 'bitki_yok' || health == 0) {
+                  return const SizedBox.shrink();
+                }
+                
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Row(

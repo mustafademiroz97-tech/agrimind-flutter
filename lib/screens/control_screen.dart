@@ -27,6 +27,10 @@ class _ControlScreenState extends State<ControlScreen> {
   double _nightTemp = 18.0;
   double _tempHysteresis = 1.0; // Sıcaklık açma/kapama farkı
   int _photoIntervalHours = 2; // Fotoğraf aralığı (saat)
+  
+  // Otomasyon durumu
+  bool _automationEnabled = true;
+  bool _scanAutomationEnabled = true;
 
   @override
   void initState() {
@@ -124,6 +128,13 @@ class _ControlScreenState extends State<ControlScreen> {
                     _buildSectionTitle('⚡ Hızlı Aksiyonlar'),
                     const SizedBox(height: 8),
                     _buildQuickActions(),
+
+                    const SizedBox(height: 24),
+
+                    // Otomasyon Kontrolü
+                    _buildSectionTitle('🤖 Otomasyon'),
+                    const SizedBox(height: 8),
+                    _buildAutomationControl(),
 
                     const SizedBox(height: 24),
 
@@ -349,6 +360,156 @@ class _ControlScreenState extends State<ControlScreen> {
     );
   }
 
+  Widget _buildAutomationControl() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Bilgilendirme
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _automationEnabled 
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _automationEnabled ? Icons.smart_toy : Icons.front_hand,
+                    color: _automationEnabled ? Colors.green : Colors.orange,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _automationEnabled
+                          ? 'Otomasyon aktif - Sistem sıcaklık/nem değerlerine göre otomatik çalışıyor'
+                          : 'Otomasyon kapalı - Tüm kontroller manuel yapılmalı (sistem kurulumu için ideal)',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Klima/Isıtıcı Otomasyonu
+            Row(
+              children: [
+                Icon(
+                  Icons.thermostat,
+                  color: _automationEnabled ? Colors.green : Colors.grey,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Klima/Isıtıcı Otomasyonu',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        _automationEnabled ? 'Sıcaklık kontrolü otomatik' : 'Manuel kontrol',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: _automationEnabled,
+                  onChanged: (value) async {
+                    try {
+                      final response = await _api.toggleAutomation(value);
+                      if (response != null && response['success'] == true) {
+                        setState(() {
+                          _automationEnabled = value;
+                        });
+                        _showResult(value 
+                            ? '✅ Klima otomasyonu açıldı' 
+                            : '⚠️ Klima otomasyonu kapatıldı');
+                      } else {
+                        _showResult('❌ Değiştirilemedi');
+                      }
+                    } catch (e) {
+                      _showResult('❌ Hata: $e');
+                    }
+                  },
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 12),
+            
+            // Tarama Otomasyonu
+            Row(
+              children: [
+                Icon(
+                  Icons.document_scanner,
+                  color: _scanAutomationEnabled ? Colors.purple : Colors.grey,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tarama Otomasyonu',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        _scanAutomationEnabled ? 'Periyodik fotoğraf + analiz' : 'Manuel tarama',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: _scanAutomationEnabled,
+                  onChanged: (value) async {
+                    try {
+                      final response = await _api.toggleScanAutomation(value);
+                      if (response != null && response['success'] == true) {
+                        setState(() {
+                          _scanAutomationEnabled = value;
+                        });
+                        _showResult(value 
+                            ? '✅ Otomatik tarama açıldı' 
+                            : '⚠️ Otomatik tarama kapatıldı');
+                      } else {
+                        _showResult('❌ Değiştirilemedi');
+                      }
+                    } catch (e) {
+                      _showResult('❌ Hata: $e');
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildManualControls() {
     return Card(
       child: Padding(
@@ -356,7 +517,7 @@ class _ControlScreenState extends State<ControlScreen> {
         child: Column(
           children: [
             _controlRow('💡 Grow Light', 'light', Icons.lightbulb),
-            _controlRow('🌀 Fan', 'fan', Icons.air),
+            _controlRow('🌀 Fan', 'fan', Icons.air, showAutoStatus: true),
             _controlRow('💧 Pompa', 'pump', Icons.water_drop),
             _controlRow('🌡️ Isıtıcı', 'heater', Icons.whatshot),
             _controlRow('❄️ Klima', 'cooler', Icons.ac_unit),
@@ -366,7 +527,7 @@ class _ControlScreenState extends State<ControlScreen> {
     );
   }
 
-  Widget _controlRow(String label, String device, IconData icon) {
+  Widget _controlRow(String label, String device, IconData icon, {bool showAutoStatus = false}) {
     return Consumer<AppProvider>(
       builder: (context, provider, _) {
         final isOn = provider.deviceStates[device] ?? false;
@@ -377,7 +538,30 @@ class _ControlScreenState extends State<ControlScreen> {
               Icon(icon, color: isOn ? Colors.green : Colors.grey),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(label, style: const TextStyle(fontSize: 16)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: const TextStyle(fontSize: 16)),
+                    if (showAutoStatus && _automationEnabled)
+                      Text(
+                        'OTO',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.green.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    if (showAutoStatus && !_automationEnabled)
+                      Text(
+                        'MANUEL',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.orange.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ),
               ),
               Switch(
                 value: isOn,

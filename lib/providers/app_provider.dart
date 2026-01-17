@@ -5,9 +5,12 @@ import '../models/chat_message.dart';
 import '../models/elevator_status.dart';
 import '../models/alert.dart';
 import '../services/api_service.dart';
+import '../services/mqtt_service.dart';
 
 class AppProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
+  MqttService? _mqttService;
+  StreamSubscription? _cabinSensorSubscription;
 
   // Sensör verileri
   SensorData _sensorData = SensorData.empty();
@@ -60,6 +63,27 @@ class AppProvider extends ChangeNotifier {
   AppProvider() {
     _startPeriodicRefresh();
     _loadInitialData();
+  }
+  
+  // MQTT servisini bağla
+  void connectMqttService(MqttService mqttService) {
+    _mqttService = mqttService;
+    _listenToCabinSensor();
+  }
+  
+  void _listenToCabinSensor() {
+    _cabinSensorSubscription = _mqttService?.cabinSensorStream.listen((cabinData) {
+      // Mevcut sensor data'yı al ve cabin bilgisini güncelle
+      final updatedData = SensorData(
+        cabin: CabinData.fromJson(cabinData),
+        water: _sensorData.water,
+        racks: _sensorData.racks,
+        time: DateTime.now().toIso8601String(),
+      );
+      _sensorData = updatedData;
+      notifyListeners();
+      debugPrint('📊 Kabin sensörü güncellendi: ${cabinData['temp']}°C, ${cabinData['humidity']}%');
+    });
   }
 
   // Bağlantı modunu değiştir - artık sadece remote mod kullanılıyor
@@ -330,6 +354,7 @@ class AppProvider extends ChangeNotifier {
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _cabinSensorSubscription?.cancel();
     super.dispose();
   }
 }

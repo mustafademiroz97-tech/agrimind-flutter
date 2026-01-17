@@ -20,16 +20,22 @@ class MqttService extends ChangeNotifier {
 
   // Streams
   final _sensorController = StreamController<SensorData>.broadcast();
+  final _cabinSensorController = StreamController<Map<String, dynamic>>.broadcast();
   final _elevatorController = StreamController<ElevatorStatus>.broadcast();
   final _alertController = StreamController<BrainAlert>.broadcast();
   final _brainResponseController =
       StreamController<Map<String, dynamic>>.broadcast();
+  final _fanStatusController = StreamController<Map<String, dynamic>>.broadcast();
+  final _heaterStatusController = StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<SensorData> get sensorStream => _sensorController.stream;
+  Stream<Map<String, dynamic>> get cabinSensorStream => _cabinSensorController.stream;
   Stream<ElevatorStatus> get elevatorStream => _elevatorController.stream;
   Stream<BrainAlert> get alertStream => _alertController.stream;
   Stream<Map<String, dynamic>> get brainResponseStream =>
       _brainResponseController.stream;
+  Stream<Map<String, dynamic>> get fanStatusStream => _fanStatusController.stream;
+  Stream<Map<String, dynamic>> get heaterStatusStream => _heaterStatusController.stream;
 
   bool get isConnected => _isConnected;
 
@@ -98,7 +104,9 @@ class MqttService extends ChangeNotifier {
     // Asansör durumu
     _client!.subscribe('agrimind/elevator/status', MqttQos.atMostOnce);
     _client!.subscribe('agrimind/elevator/position', MqttQos.atMostOnce);
-
+    // Fan ve Heater durumu
+    _client!.subscribe('agrimind/fan/status', MqttQos.atMostOnce);
+    _client!.subscribe('agrimind/heater/status', MqttQos.atMostOnce);
     // Brain yanıtları ve alertler
     _client!.subscribe('agrimind/brain/response', MqttQos.atMostOnce);
     _client!.subscribe('agrimind/brain/alert', MqttQos.atMostOnce);
@@ -119,8 +127,15 @@ class MqttService extends ChangeNotifier {
 
         if (topic == 'agrimind/sensors/data') {
           _sensorController.add(SensorData.fromJson(json));
+        } else if (topic == 'agrimind/sensors/cabin') {
+          // Kabin sensör verisi - stream'e ekle
+          _cabinSensorController.add(json);
         } else if (topic.startsWith('agrimind/elevator/')) {
           _elevatorController.add(ElevatorStatus.fromJson(json));
+        } else if (topic == 'agrimind/fan/status') {
+          _fanStatusController.add(json);
+        } else if (topic == 'agrimind/heater/status') {
+          _heaterStatusController.add(json);
         } else if (topic == 'agrimind/brain/response') {
           _brainResponseController.add(json);
         } else if (topic.contains('/alert')) {
@@ -146,7 +161,35 @@ class MqttService extends ChangeNotifier {
       builder.payload!,
     );
   }
+  // Fan komutu gönder
+  void sendFanCommand(String cmd, {Map<String, dynamic>? params}) {
+    if (_client == null || !_isConnected) return;
 
+    final payload = jsonEncode({'cmd': cmd, ...?params});
+    final builder = MqttClientPayloadBuilder();
+    builder.addString(payload);
+
+    _client!.publishMessage(
+      'agrimind/fan/cmd',
+      MqttQos.atMostOnce,
+      builder.payload!,
+    );
+  }
+
+  // Heater komutu gönder
+  void sendHeaterCommand(String cmd) {
+    if (_client == null || !_isConnected) return;
+
+    final payload = jsonEncode({'cmd': cmd});
+    final builder = MqttClientPayloadBuilder();
+    builder.addString(payload);
+
+    _client!.publishMessage(
+      'agrimind/heater/cmd',
+      MqttQos.atMostOnce,
+      builder.payload!,
+    );
+  }
   void disconnect() {
     _client?.disconnect();
     _isConnected = false;
@@ -156,9 +199,12 @@ class MqttService extends ChangeNotifier {
   void dispose() {
     disconnect();
     _sensorController.close();
+    _cabinSensorController.close();
     _elevatorController.close();
     _alertController.close();
     _brainResponseController.close();
+    _fanStatusController.close();
+    _heaterStatusController.close();
     super.dispose();
   }
 }

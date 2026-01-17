@@ -679,4 +679,45 @@ class ApiService {
       return {};
     }
   }
+
+  // ============ AUTOMATION CONTROL ============
+  Future<Map<String, dynamic>?> toggleAutomation(bool enabled) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/automation/toggle'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'enabled': enabled}),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('API Error (automation toggle): $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> toggleScanAutomation(bool enabled) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/automation/scan'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'enabled': enabled}),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('API Error (scan automation toggle): $e');
+      return null;
+    }
+  }
 }

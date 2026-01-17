@@ -204,8 +204,12 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
-                    itemCount: data.racks.length,
+                    itemCount: data.racks.isEmpty ? 4 : data.racks.length,
                     itemBuilder: (context, index) {
+                      // Raf verisi yoksa boş raf göster
+                      if (data.racks.isEmpty) {
+                        return RackCard(rack: RackData.empty(index + 1));
+                      }
                       return RackCard(rack: data.racks[index]);
                     },
                   ),

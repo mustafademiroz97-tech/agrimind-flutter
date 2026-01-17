@@ -21,17 +21,27 @@ class AgriMindApp extends StatelessWidget {
         Provider(create: (_) => ApiService()),
         ChangeNotifierProvider(create: (_) => MqttService()),
       ],
-      child: MaterialApp(
-        title: 'AgriMind',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.green,
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
-        home: const HomeScreen(),
+      child: Builder(
+        builder: (context) {
+          // MQTT servisini AppProvider'a bağla
+          final appProvider = context.read<AppProvider>();
+          final mqttService = context.read<MqttService>();
+          appProvider.connectMqttService(mqttService);
+          mqttService.connect(); // MQTT bağlantısını başlat
+          
+          return MaterialApp(
+            title: 'AgriMind',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.green,
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
+            home: const HomeScreen(),
+          );
+        },
       ),
     );
   }
