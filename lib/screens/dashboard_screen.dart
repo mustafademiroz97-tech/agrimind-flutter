@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/mqtt_service.dart';
+import '../models/sensor_data.dart';
 import '../widgets/sensor_gauge.dart';
 import '../widgets/rack_card.dart';
 import 'settings_screen.dart';
